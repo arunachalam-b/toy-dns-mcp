@@ -31,8 +31,11 @@ const handler = createMcpHandler(
                     
                     const { stdout, stderr } = await execAsync(command);
                     
-                    if (stderr) {
-                        throw new Error(`Dig command error: ${stderr}`);
+                    // Note: "Non-authoritative answer:" in stderr is normal for nslookup, not an error
+                    if (stderr && !stderr.includes("Non-authoritative answer:")) {
+                        return {
+                            content: [{ type: "text", text: `Command error: ${stderr}` }],
+                        };
                     }
                     
                     if (!stdout.trim()) {
